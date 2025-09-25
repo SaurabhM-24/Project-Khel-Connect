@@ -125,7 +125,7 @@ Videos Collection (/videos/{videoId})
   firebase.firestore().collection(\'videos\').orderBy(\'skillScore\',\'desc\').get()   /videos                 Get leaderboard
                                                                                                                (requires index)
 
-  firebase.firestore().doc(\'users/{uid}\').get()                                      /users/{uid}            Get user profile
+ firebase.firestore().doc(\'users/{uid}\').get()                                      /users/{uid}            Get user profile
   ------------------------------------------------------------------------------------------------------------------------------------
 
 # **5. Backend Triggers (Cloud Functions)**
