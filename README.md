@@ -121,7 +121,6 @@ npm install
 For Android:  
   npx react-native run-android
 
-
 For iOS:  
   npx react-native run-ios
 
