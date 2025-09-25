@@ -1,67 +1,165 @@
-Khel-Connect: AI-Powered Platform for Democratizing Sports Talent🌟 
+# Khel-Connect: AI-Powered Platform for Democratizing Sports Talent
 
-Project Overview
-Khel-Connect is an AI-powered mobile and web platform designed to bridge the gap between undiscovered grassroots sporting talent and official scouting infrastructure in India. Our mission is to create a digital meritocracy for Indian sports, where an athlete's skill, not their background or location, determines their future.
+> *Bridging the gap between hidden grassroots sports talent and official scouting infrastructure in India.*
 
-The platform functions as a "LinkedIn for aspiring athletes," allowing them to create a digital portfolio and showcase their skills. Our core innovation is the AI Talent Scout, a feature that uses computer vision to analyze a player's performance from a simple video clip and provides an objective "Skill Score." This data feeds into a centralized dashboard for sports authorities, creating a new, unbiased channel for talent identification.
+![Repo Size](https://img.shields.io/github/repo-size/SaurabhM-24/Project-Khel-Connect?color=00FF7F)  
+![License](https://img.shields.io/github/license/SaurabhM-24/Project-Khel-Connect?color=blue)  
+![Contributions](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg)  
+![Open Issues](https://img.shields.io/github/issues/SaurabhM-24/Project-Khel-Connect)  
+![Closed Issues](https://img.shields.io/github/issues-closed/SaurabhM-24/Project-Khel-Connect)  
 
-This project was developed for the SIH 2025 (Problem Statement: SIH25073 - Ministry of Youth Affairs and Sports).
+---
 
+## Table of Contents
 
-✨ Key Features
-* AI Talent Scout: The flagship feature that analyzes user-uploaded video clips of a specific sports action (e.g., a cricket bowl) and generates a quantified Skill Score based on key metrics like body posture, arm angle, and speed.
-* Player Profiles: A digital sports portfolio where athletes can track their progress, view their Skill Scores, and maintain a showcase of their performance clips.
-* Leaderboards: Dynamic, region-specific leaderboards that rank players based on their Skill Scores, promoting healthy competition and providing visibility to sports authorities.
-* Scout Dashboard: A web portal for authenticated sports authorities to view and filter top-ranked players, analyze their profiles, and initiate the scouting process.
+- [Overview](#overview)  
+- [Key Features](#key-features)  
+- [Tech Stack](#tech-stack)  
+- [Setup & Usage](#setup--usage)  
+  - [Prerequisites](#prerequisites)  
+  - [Installation](#installation)  
+  - [Firebase Setup](#firebase-setup)  
+  - [Run the Application](#run-the-application)  
+- [Architecture Diagram / Demo](#architecture-diagram--demo)  
+- [Contribution Guidelines](#contribution-guidelines)  
+- [License](#license)  
 
+---
 
-🛠️ Technology Stack
-Khel-Connect is built on a modern, scalable, and cost-effective architecture.
-Component  Technologies Used
-Frontend   React Native
-Backend    Firebase (Authentication, Firestore, Storage0)
-AI/CV      MediaPipe, OpenCV
-Cloud      Firebase Cloud Functions
+## Overview
 
+**Khel-Connect** is an **AI-powered mobile + web platform** — a “LinkedIn for Aspiring Athletes”.  
 
-🚀 Setup and Usage
-Prerequisites
-Node.js (v18 or higher)
-React Native CLI
-Firebase CLI
+Players can:  
+- Create a **digital portfolio**  
+- Upload performance videos  
+- Receive an **AI-generated Skill Score**  
+- Compete in **leaderboards** and get noticed by scouts  
 
-Installation
-1. Clone the repository:
-git clone [https://github.com/SaurabhM-24/Project-Khel-Connect.git](https://github.com/SaurabhM-24/Project-Khel-Connect.git)
-cd khel-connect
+**Built for:** Smart India Hackathon (SIH) 2025  
+**Problem Statement:** SIH25073 – Ministry of Youth Affairs and Sports  
 
-2. Install dependencies:
-# For the mobile app
+---
+
+## Key Features
+
+- **AI Talent Scout** – Computer-vision-based Skill Scoring (pose, angles, speed).  
+- **Player Profiles** – Digital sports portfolio with clips & scores.  
+- **Leaderboards** – Region-specific rankings to surface hidden talent.  
+- **Scout Dashboard** – Web portal for sports authorities to discover players.  
+
+---
+
+## Tech Stack
+
+**Frontend (Mobile):**  
+![React Native](https://img.shields.io/badge/React%20Native-20232A?logo=react&logoColor=61DAFB)
+
+**Backend & Database:**  
+![Firebase](https://img.shields.io/badge/Firebase-ffaa00?logo=firebase&logoColor=white)
+
+**AI / Computer Vision:**  
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)  
+![OpenCV](https://img.shields.io/badge/OpenCV-27338e?logo=opencv&logoColor=white)  
+![MediaPipe](https://img.shields.io/badge/MediaPipe-4285F4?logo=google&logoColor=white)
+
+**Web Dashboard:**  
+![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)  
+![Vue.js](https://img.shields.io/badge/Vue.js-35495E?logo=vue.js&logoColor=4FC08D)
+
+**Deployment:**  
+![Firebase Functions](https://img.shields.io/badge/Firebase%20Functions-FFCA28?logo=firebase&logoColor=black)  
+![Expo](https://img.shields.io/badge/Expo-000020?logo=expo&logoColor=white)  
+
+---
+
+## Setup & Usage
+
+### Prerequisites
+- Node.js (v18+)  
+- React Native CLI (or Expo)  
+- Firebase CLI  
+
+---
+
+### Installation
+```bash
+Clone repository
+git clone https://github.com/<your-username>/<your-repo>.git
+cd <your-repo>
+
+Install mobile app dependencies
 npm install
-# For the Firebase functions
+
+Install Firebase functions dependencies
 cd functions
 npm install
+```
 
-3. Set up Firebase:
-* Create a new Firebase project and enable Firestore and Firebase Storage.
-* Configure your project's Firebase credentials.
-* Deploy the Cloud Functions from the functions directory:
+
+---
+
+### Firebase Setup
+
+```
+1. Create a Firebase project.  
+2. Enable the following services:  
+   - Authentication  
+   - Firestore Database  
+   - Storage  
+3. Add Firebase config credentials to your app.  
+4. Deploy Cloud Functions:
   firebase deploy --only functions
 
-4. Run the application:
-# For Android
-npx react-native run-android
-# For iOS
-npx react-native run-ios
+```
 
 
-🤝 Contribution Guidelines
-We welcome contributions! Please follow these steps to get started:
-1. Fork the repository and create a new branch for your feature or bug fix.
-2. Follow the existing code style.
-3. Write clear, concise commit messages.
-4. Submit a Pull Request with a detailed description of your changes.For major features, please open an issue first to discuss the proposed changes.
+---
+
+### Run the Application
+```
+For Android:  
+  npx react-native run-android
+
+For iOS:  
+  npx react-native run-ios
+
+```
+---
+
+## Architecture Diagram / Demo
+```
+You can showcase your system flow and demo with visuals.  
+
+Add images/GIFs in `docs/images/` and reference them in your README:  
+
+![Architecture](./docs/images System architecture (User → Firebase → Cloud Function → Firestore → Dashboard)
+![Demo]( Clip showing upload → AI analysis → leaderboard update
+
+```
+---
+
+## Contribution Guidelines
+```
+We welcome contributions.  
+
+1. Fork the repository  
+2. Create a feature branch:  
+    git checkout -b feature/my-feature
+3. Commit changes:
+    git commit -m "feat: add my feature"
+4. Push to the branch:
+    git push origin feature/my-feature
+5. Open a Pull Request  
+
+For major changes, please open an issue first to discuss your ideas.
+```
+---
+
+## License
+
+This project is licensed under the MIT License.  
+See the [LICENSE](./LICENSE) file for more details.
 
 
-📄 License
-This project is licensed under the MIT License. See the LICENSE file for details.
+
