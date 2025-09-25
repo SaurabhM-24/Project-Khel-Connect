@@ -1,117 +1,138 @@
 # Khel-Connect: API Documentation (v1)
 
-## 1. Introduction
-This document provides a structured overview of the API and data model for the **Khel-Connect** platform. 
-
-Khel-Connect follows a **serverless, Firebase-centric architecture**. The "API" is not a set of traditional REST endpoints but a series of **interactions with Firebase services** (Authentication, Firestore, and Storage) through their respective SDKs. 
-
-All communication is handled securely by Firebase's built-in SDKs and **Security Rules**, ensuring data integrity and user privacy.
+## Highlights
+- Built on Firebase SDKs for **Authentication, Firestore, and Storage**.  
+- **Serverless Cloud Functions** handle AI video processing.  
+- **Real-time** updates via Firestore listeners.  
+- **Secure role-based access** for athletes and scouts.  
+- Designed for **scalability and future multi-sport expansion**.  
 
 ---
 
-## 2. Authentication
+## Table of Contents
+1. [Authentication & Security](#1-authentication--security)  
+2. [Storage API (Video Upload)](#2-storage-api-video-upload)  
+3. [Firestore Database API](#3-firestore-database-api)  
+   - [Data Models](#31-data-models)  
+   - [Core Data Operations](#32-core-data-operations)  
+4. [Backend Triggers (Cloud Functions)](#4-backend-triggers-cloud-functions)  
+5. [Error Handling](#5-error-handling)  
+6. [Versioning & Maintenance](#6-versioning--maintenance)  
+7. [Summary](#7-summary)  
 
-### 2.1 Athlete and Scout Authentication
-Authentication is managed by **Firebase Authentication**.
+---
+
+## 1. Authentication & Security
+Authentication is managed by **Firebase Authentication**. Currently, the platform supports email/password login.  
 
 | SDK Call | Description |
 |----------|-------------|
-| `firebase.auth().signInWithEmailAndPassword(email, password)` | Authenticates a user with an email and password. |
-| `firebase.auth().signOut()` | Signs out the currently authenticated user. |
-| `firebase.auth().onAuthStateChanged(user)` | Listener that triggers whenever the user’s authentication state changes. |
+| `firebase.auth().signInWithEmailAndPassword(email, password)` | Authenticate user login |
+| `firebase.auth().signOut()` | Log out the current user |
+| `firebase.auth().onAuthStateChanged(user)` | Listener for login state changes |
 
-### 2.2 Data Security
-Access is controlled by **Firebase Security Rules**:
-- **Athletes**: Can only read and write to their own profile data and upload videos to their designated folder in Firebase Storage.  
-- **Scouts**: Have read-only access to all player profiles and video metadata.
+### Security Rules
+- **Athletes**: Can read/write their own profile and upload videos.  
+- **Scouts**: Read-only access to all profiles and video metadata.  
+- **Rules**: Enforced using Firebase Security Rules and HTTPS for data integrity.  
+
+For detailed Firebase Authentication documentation → [Firebase Auth Docs](https://firebase.google.com/docs/auth)  
 
 ---
 
-## 3. Storage API (Video Upload)
-Video uploads are managed by **Firebase Storage**.
+## 2. Storage API (Video Upload)
+Video uploads are handled via **Firebase Storage**.  
 
 | SDK Call | Description |
 |----------|-------------|
-| `firebase.storage().ref(path).put(file)` | Uploads a video file to a specified path in Firebase Storage (unique per user & video). |
-| `firebase.storage().ref(path).getDownloadURL()` | Retrieves a public URL for the uploaded video. This URL is then stored in Firestore. |
+| `firebase.storage().ref(path).put(file)` | Upload video to a unique path in storage |
+| `firebase.storage().ref(path).getDownloadURL()` | Get public URL for uploaded video |
+
+For full Firebase Storage reference → [Firebase Storage Docs](https://firebase.google.com/docs/storage)  
 
 ---
 
-## 4. Firestore Database API
-The **Firestore Database** is the central hub for application data. Data is accessed via the Firebase SDK. 
+## 3. Firestore Database API
+The **Firestore Database** serves as the hub for user data, video metadata, and AI results.  
 
-### 4.1 Data Models
+### 3.1 Data Models
+<details>
+<summary>Click to expand Firestore Schema</summary>
 
 #### Users Collection
-- **Path**: `/users/{uid}`  
-- **Description**: Stores profile information for athletes and scouts.
+- Path: `/users/{uid}`  
+- Document ID: `uid` (from Firebase Authentication)  
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | string | User’s full name. |
-| `email` | string | User’s email address. |
-| `location` | string | City/State location. |
-| `sport` | string | Athlete’s primary sport (e.g., "Cricket"). |
-| `role` | string | User role: `athlete` or `scout`. |
+| name | string | Full name |
+| email | string | Email address |
+| location | string | City/State |
+| sport | string | Primary sport (default: Cricket) |
+| role | string | `athlete` or `scout` |
 
 #### Videos Collection
-- **Path**: `/videos/{documentId}`  
-- **Description**: Stores metadata and AI analysis results for each uploaded video.
+- Path: `/videos/{documentId}`  
+- Document ID: Auto-generated  
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `userId` | string | UID of the uploading user. |
-| `videoUrl` | string | Public download URL from Firebase Storage. |
-| `uploadTimestamp` | timestamp | Upload time. |
-| `status` | string | Processing status: `processing`, `complete`, or `failed`. |
-| `skillScore` | number | Numerical score (e.g., 88) generated by AI model. |
-| `analysisMetrics` | map | Detailed breakdown of AI analysis (e.g., `{ "armAngle": 90, "swingSpeed": 75 }`). |
+| userId | string | Reference to the user who uploaded the video |
+| videoUrl | string | Public Firebase Storage URL |
+| uploadTimestamp | timestamp | Upload time |
+| status | string | `processing`, `complete`, `failed` |
+| skillScore | number | AI-generated score |
+| analysisMetrics | map/object | e.g., { armAngle: 90, swingSpeed: 75 } |
 
----
+</details>
 
-### 4.2 Core Data Operations
-
+### 3.2 Core Data Operations
 | SDK Call | Path | Description |
 |----------|------|-------------|
-| `firebase.firestore().collection('videos').add(data)` | `/videos` | Creates a new video document after a video is uploaded. |
-| `firebase.firestore().doc('videos/{docId}').update(data)` | `/videos/{docId}` | Updates status and AI analysis results of a video. |
-| `firebase.firestore().collection('videos').where('userId', '==', uid).get()` | `/videos` | Retrieves all videos for a specific user. |
-| `firebase.firestore().collection('videos').orderBy('skillScore', 'desc').get()` | `/videos` | Retrieves leaderboard of videos ordered by skill score (may require Firestore index). |
-| `firebase.firestore().doc('users/{uid}').get()` | `/users/{uid}` | Retrieves user profile. |
-| `firebase.firestore().collection('videos').onSnapshot(snapshot)` | `/videos` | Real-time listener for video processing updates and results. |
+| `firebase.firestore().collection('videos').add(data)` | `/videos` | Create a new video record |
+| `firebase.firestore().doc('videos/{docId}').update(data)` | `/videos/{docId}` | Update with AI results |
+| `firebase.firestore().collection('videos').where('userId', '==', uid).get()` | `/videos` | Fetch all videos for a user |
+| `firebase.firestore().collection('videos').orderBy('skillScore', 'desc').get()` | `/videos` | Retrieve leaderboard (requires index) |
+| `firebase.firestore().doc('users/{uid}').get()` | `/users/{uid}` | Retrieve user profile |
+| `firebase.firestore().collection('videos').onSnapshot(snapshot)` | `/videos` | Real-time video status/results |
+
+For complete Firestore documentation → [Firebase Firestore Docs](https://firebase.google.com/docs/firestore)  
 
 ---
 
-## 5. Backend Triggers (Cloud Functions)
-The AI analysis pipeline is powered by **Firebase Cloud Functions**.
+## 4. Backend Triggers (Cloud Functions)
+The AI pipeline runs on **Firebase Cloud Functions**.  
 
-- **Trigger**: `onFinalize` event → Fires when a new video is uploaded to Firebase Storage.  
-- **Input**: Event object containing file metadata.  
-- **Process**: Cloud Function extracts frames, applies pose estimation, calculates metrics, and generates a skill score.  
-- **Output**: Writes analysis results into a corresponding Firestore document.  
+- **Trigger**: `onFinalize` event when a new video is uploaded.  
+- **Process**: Extract frames → Pose estimation via MediaPipe → Calculate metrics → Generate Skill Score.  
+- **Output**: Results written to Firestore.  
 
-This approach ensures that all heavy computation is abstracted away from the frontend, keeping the application **lightweight, secure, and maintainable**.
-
----
-
-## 6. Error Handling (Recommended)
-- **Video Upload Failure** → Return status `failed` in Firestore with error details.  
-- **AI Processing Error** → Update video document with status `failed` and log issue for debugging.  
-- **Invalid User Access** → Blocked by Firebase Security Rules.  
+More on Cloud Functions → [Firebase Cloud Functions Docs](https://firebase.google.com/docs/functions)  
 
 ---
 
-## 7. Versioning & Maintenance
+## 5. Error Handling
+- **Video Upload Failure** → Status set to `failed` in Firestore.  
+- **AI Processing Failure** → Status `failed`, log details for debugging.  
+- **Database Write Failure** → Retry logic applied.  
+- **Unauthorized Access** → Blocked via Firebase Security Rules.  
+
+---
+
+## 6. Versioning & Maintenance
 - **API Version**: v1.0  
 - **Last Updated**: September 2025  
-- Future updates will introduce: 
-  - Support for multi-sport analysis.  
+- Future updates may include:  
+  - Multi-sport analysis support.  
   - Expanded scout dashboard queries.  
-  - Role-based advanced permissions.
+  - Role-based advanced permissions.  
 
 ---
 
-## 8. Summary
-The **Khel-Connect API layer** leverages Firebase SDKs, Firestore, and Cloud Functions to create a seamless, secure, and scalable system for athlete video uploads, AI-driven skill evaluation, and scout access.  
+## 7. Summary
+The **Khel-Connect API** integrates Firebase SDKs, Firestore, and Cloud Functions to deliver a secure, scalable, and real-time sports talent discovery platform.  
 
-This architecture ensures minimal backend complexity while enabling powerful, real-time sports talent discovery.
+- Lightweight, serverless backend.  
+- Real-time updates for athletes and scouts.  
+- Secure and role-based by design.  
+- Extensible to multiple sports.  
