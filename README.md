@@ -8,6 +8,21 @@
 
 ---
 
+## 📑 Table of Contents
+- [📌 Overview](#-overview)
+- [✨ Key Features](#-key-features)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [🚀 Setup & Usage](#-setup--usage)
+  - [🔧 Prerequisites](#-prerequisites)
+  - [📥 Installation](#-installation)
+  - [🔌 Firebase Setup](#-firebase-setup)
+  - [▶️ Run the Application](#️-run-the-application)
+- [📁 Architecture Diagram / Demo (Optional)](#-architecture-diagram--demo-optional)
+- [🤝 Contribution Guidelines](#-contribution-guidelines)
+- [📄 License](#-license)
+
+---
+
 ## 📌 Overview
 
 **Khel-Connect** is an **AI-powered mobile + web platform** — a “LinkedIn for Aspiring Athletes”. Players can:
@@ -44,12 +59,15 @@
 
 ## 🚀 Setup & Usage
 
-### Prerequisites
+### 🔧 Prerequisites
 - Node.js (v18+)
 - React Native CLI (or Expo)
 - Firebase CLI
 
-### Install
+---
+
+### 📥 Installation
+
 ```bash
 # clone (if not done above)
 git clone https://github.com/<your-username>/<your-repo>.git
@@ -61,17 +79,3 @@ npm install
 # firebase functions
 cd functions
 npm install
-
-# Firebase Setup
-```
-1. Create Firebase project (Auth, Firestore, Storage).
-2. Add Firebase config to your app.
-3. Deploy Cloud Functions:
-   firebase deploy --only functions
-```
-# Run the app
-Android
-npx react-native run-android
-
-iOS
-npx react-native run-ios
