@@ -2,8 +2,6 @@
 
 > *Bridging the gap between hidden grassroots sports talent and official scouting infrastructure in India.*
 
-![Repo Banner](./docs/images/banner.png) <!-- Replace with your custom banner image -->
-
 ![Repo Size](https://img.shields.io/github/repo-size/SaurabhM-24/Project-Khel-Connect?color=00FF7F)  
 ![License](https://img.shields.io/github/license/SaurabhM-24/Project-Khel-Connect?color=blue)  
 ![Contributions](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg)  
