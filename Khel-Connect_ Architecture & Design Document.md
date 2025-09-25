@@ -1,22 +1,39 @@
-# Khel-Connect: Architecture & Design Document (v1)
+# 🏏 Khel-Connect: Architecture & Design Document (v1)
 
-## 1. Introduction & System Overview
+## 🔥 Highlights
+- 🎯 **Single codebase** with React Native & Firebase.  
+- 🤖 **AI-driven scoring** via Cloud Functions + MediaPipe.  
+- ⚡ **Real-time leaderboards** with Firestore listeners.  
+- 🔒 **Secure role-based access** for athletes & scouts.  
+- 📈 **Future-ready** for multi-sport expansion.  
+
+---
+
+## 📑 Table of Contents
+1. [System Architecture Overview](#1-system-architecture-overview)  
+2. [High-Level Architectural Flow](#2-high-level-architectural-flow)  
+3. [Component Breakdown](#3-component-breakdown)  
+4. [API and Data Model](#4-api-and-data-model)  
+5. [Security, Error Handling & Scalability](#5-security-error-handling--scalability)  
+6. [Summary](#6-summary)  
+
+---
+
+## 1. System Architecture Overview
+<details>
+<summary>📌 Click to expand System Overview</summary>
+
 Khel-Connect is built on a **modern, serverless, and event-driven architecture** designed for scalability, cost-effectiveness, and rapid development.  
 
-At its core, the system leverages **Firebase services** with Cloud Functions to execute computationally intensive AI analysis without requiring a dedicated server.  
+- **Athlete App** → Cross-platform mobile app for video capture & profile management.  
+- **Scout Dashboard** → Secure web portal for scouts to access leaderboards & analysis.  
+- **AI Backend** → Serverless video-to-score pipeline powered by Firebase Cloud Functions.  
 
-### Key Goals
-- **Scalability**: Auto-scaling serverless backend for high video upload volumes.  
-- **Cost-effectiveness**: Pay-per-use model with Firebase and Cloud Functions.  
-- **Real-time Feedback**: Quick skill analysis and leaderboard updates.  
-- **Security & Privacy**: Role-based access control with Firebase Authentication and Security Rules.  
-- **Extensibility**: Modular design to add support for new sports and AI models.  
+</details>
 
 ---
 
 ## 2. High-Level Architectural Flow
-
-### Data Flow (Athlete → Scout)
 ```plaintext
 +--------------------+       +--------------------+       +------------------------+ 
 | Athlete Mobile App  | --->  | Firebase Storage    | --->  | Firebase Cloud Function | 
@@ -36,122 +53,94 @@ At its core, the system leverages **Firebase services** with Cloud Functions to 
                                            | (Web App)         | 
                                            +-------------------+ 
 ```
-
-> **Recommendation:** Replace ASCII diagram with a professional block diagram for final presentation.
+> 🔗 Replace ASCII with a **visual diagram** for presentations.
 
 ---
 
 ## 3. Component Breakdown
 
-### 3.1 Frontend Components
-
-| Component | Technology | Purpose | Key APIs |
-|-----------|------------|---------|----------|
-| Athlete App (`khel-connect-app`) | React Native | Cross-platform mobile app for authentication, profile management, video upload, and viewing skill scores & leaderboards. | Firebase Authentication, Firebase Storage, Firestore |
-| Scout Dashboard (`khel-connect-scout`) | React / Vue.js / Web Framework | Secure web portal for scouts to log in, view athlete profiles, leaderboards, and AI metrics. | Firebase Authentication, Firestore |
-
----
-
-### 3.2 Backend & AI Components
-
-| Component | Role | Details |
-|-----------|------|---------|
-| Firebase Authentication | Identity & Security | Manages user accounts (athletes & scouts). |
-| Firebase Storage | Media Handling | Stores all uploaded video files securely. |
-| Firestore Database | Data Hub | Stores user profiles, video metadata, and AI-generated results (Skill Score, metrics). |
-| Firebase Cloud Functions | AI Processing | Triggered by video uploads, processes with MediaPipe/OpenCV, calculates metrics, and updates Firestore. |
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Athlete App** (`khel-connect-app`) | React Native | User authentication, video uploads, profile & leaderboard view. |
+| **Scout Dashboard** (`khel-connect-scout`) | React / Vue.js | Secure web portal for scouts to view athletes & leaderboards. |
+| **Firebase Authentication** | Firebase | Manages athlete & scout accounts. |
+| **Firebase Storage** | Firebase | Stores uploaded athlete videos. |
+| **Firestore Database** | Firebase | Stores user profiles, video metadata & AI results. |
+| **Firebase Cloud Functions** | Node.js/Python | Processes video → extracts metrics → generates Skill Score. |
 
 ---
 
-## 4. AI Pipeline
+## 4. API and Data Model
 
-### Step-by-Step Process
-1. **Video Ingestion** → Cloud Function retrieves uploaded video from Firebase Storage.  
-2. **Pose Estimation** → MediaPipe extracts key joint coordinates (shoulder, elbow, wrist, etc.) frame-by-frame.  
-3. **Custom Metric Calculation** → Domain-specific algorithm calculates biomechanics (e.g., arm angle, swing speed).  
-4. **Skill Score Generation** → Metrics combined into a final score.  
-5. **Database Update** → Firestore updated with score & metrics; frontend displays results in real time.  
+### 4.1 Firestore Data Model
+<details>
+<summary>📂 Click to expand Firestore Schema</summary>
 
----
-
-## 5. Data Model
-
-### Users Collection
+#### Users Collection
 - **Path**: `/users/{uid}`  
-- **Description**: Stores profile information for both athletes and scouts.  
+- **Document ID**: `uid` (from Firebase Authentication)  
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | string | Full name of the user. |
-| `email` | string | User’s email address. |
-| `location` | string | City/State of the user. |
-| `sport` | string | Primary sport (initially Cricket). |
-| `role` | string | `athlete` or `scout`. |
+| `name` | string | Full name |
+| `email` | string | Email address |
+| `location` | string | City/State |
+| `sport` | string | Primary sport (default Cricket) |
+| `role` | string | `athlete` or `scout` |
 
-### Videos Collection
+#### Videos Collection
 - **Path**: `/videos/{documentId}`  
-- **Description**: Stores metadata and AI analysis results for uploaded videos.  
+- **Document ID**: Auto-generated  
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `userId` | string | Reference to the uploading user. |
-| `videoUrl` | string | Public video URL in Firebase Storage. |
-| `uploadTimestamp` | timestamp | When the video was uploaded. |
-| `status` | string | Processing status: `processing`, `complete`, `failed`. |
-| `skillScore` | number | AI-generated performance score. |
-| `analysisMetrics` | map | Detailed breakdown (e.g., `{ "armAngle": 90, "swingSpeed": 75 }`). |
+| `userId` | string | Reference to uploading user |
+| `videoUrl` | string | Public Firebase Storage URL |
+| `uploadTimestamp` | timestamp | Time uploaded |
+| `status` | string | `processing`, `complete`, `failed` |
+| `skillScore` | number | AI-generated performance score |
+| `analysisMetrics` | map/object | e.g. `{ "armAngle": 90, "swingSpeed": 75 }` |
+
+</details>
+
+### 4.2 API Access (via Firebase SDK)
+| Function | Purpose |
+|----------|---------|
+| `firebase.auth().signInWithEmailAndPassword()` | User login |
+| `firebase.auth().signOut()` | Logout |
+| `firebase.storage().ref(path).put(file)` | Upload video |
+| `firebase.storage().ref(path).getDownloadURL()` | Get video URL |
+| `firebase.firestore().collection('videos').add(data)` | Create video entry |
+| `firebase.firestore().doc('videos/{docId}').update(data)` | Update with AI results |
+| `firebase.firestore().collection('videos').orderBy('skillScore', 'desc').get()` | Leaderboard |
+| `firebase.firestore().collection('videos').onSnapshot(snapshot)` | Real-time updates |
+
+🔗 For full API reference → [See Khel-Connect API Documentation](Khel-Connect_API_Documentation.md)
 
 ---
 
-## 6. API Access (via Firebase SDK)
+## 5. Security, Error Handling & Scalability
 
-Instead of REST APIs, Khel-Connect relies on Firebase SDK calls.
+### 🔒 Security
+- Role-based access (athletes write-only, scouts read-only).  
+- Firebase Security Rules for strict access control.  
+- HTTPS + encrypted storage.  
 
-| Function | Description |
-|----------|-------------|
-| `firebase.auth().signInWithEmailAndPassword(email, password)` | User login. |
-| `firebase.auth().signOut()` | User logout. |
-| `firebase.storage().ref(path).put(file)` | Upload video to storage. |
-| `firebase.storage().ref(path).getDownloadURL()` | Retrieve video URL. |
-| `firebase.firestore().collection('videos').add(data)` | Create new video entry. |
-| `firebase.firestore().doc('videos/{docId}').update(data)` | Update video with AI results. |
-| `firebase.firestore().collection('videos').orderBy('skillScore', 'desc').get()` | Get leaderboard. |
-| `firebase.firestore().collection('videos').onSnapshot(snapshot)` | Real-time updates. |
+### ⚠️ Error Handling
+- Upload failure → mark as `failed` in Firestore.  
+- AI error → set status `failed`, log details.  
+- DB write failure → retry mechanism.  
 
----
-
-## 7. Error Handling & Reliability
-
-- **Video Upload Failure** → Mark status as `failed` in Firestore; notify user.  
-- **AI Processing Failure** → Update document with `failed` status, log error for debugging.  
-- **Database Write Failure** → Retry mechanism via Firebase SDK.  
-- **Unauthorized Access** → Prevented via Firebase Security Rules.  
+### 📈 Scalability
+- Serverless Cloud Functions auto-scale with load.  
+- Modular AI pipelines → easy to extend to multiple sports.  
+- Firestore indexes → optimized queries for leaderboards.  
 
 ---
 
-## 8. Security Considerations
+## 6. Summary
+Khel-Connect leverages **serverless architecture, AI-driven analysis, and Firebase’s scalable backend** to create a lightweight, secure, and extensible platform.  
 
-- **Role-based Access Control (RBAC)** via Firebase Auth (athletes write-only for their data; scouts read-only access).  
-- **Firebase Security Rules** restrict unauthorized reads/writes.  
-- **Data Privacy** ensured by encrypted storage and HTTPS communication.  
-
----
-
-## 9. Scalability & Extensibility
-
-- **Serverless Scaling**: Cloud Functions auto-scale with upload volume.  
-- **Future Sports Support**: Modular AI pipelines can be extended to football, basketball, etc.  
-- **Leaderboard Optimization**: Firestore indexing for efficient queries.  
-- **Monitoring**: Firebase Analytics + Cloud Logging for performance tracking.  
-
----
-
-## 10. Summary
-
-The **Khel-Connect Architecture** combines serverless design, AI-driven video analysis, and Firebase’s scalable backend.  
-
-By separating frontend, backend, and AI responsibilities while keeping APIs lightweight, the system ensures:  
-- Low-cost operation.  
-- Real-time athlete evaluation.  
-- Secure scout access.  
-- Future-ready extensibility for multiple sports.  
+✅ **Low-cost** → pay-per-use model.  
+✅ **Real-time** → instant skill scoring & leaderboards.  
+✅ **Future-ready** → supports expansion across multiple sports.  
