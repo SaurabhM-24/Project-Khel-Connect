@@ -79,3 +79,73 @@ npm install
 # firebase functions
 cd functions
 npm install
+
+```
+🔌 Firebase Setup
+
+Create a Firebase project and enable:
+
+Authentication
+
+Firestore Database
+
+Storage
+
+Add Firebase config credentials to your app.
+
+Deploy Cloud Functions:
+
+firebase deploy --only functions
+
+▶️ Run the Application
+
+For Android:
+
+npx react-native run-android
+
+
+For iOS:
+
+npx react-native run-ios
+
+📁 Architecture Diagram / Demo (Optional)
+
+You can showcase your system flow and demo with visuals:
+
+Add images/GIFs in docs/images/
+
+Reference them like:
+
+![Architecture](./docs/images/architecture.png)
+
+
+💡 Example ideas:
+
+architecture.png → System architecture (User → Firebase → Cloud Function → Firestore → Dashboard)
+
+demo.gif → Clip showing upload → AI analysis → leaderboard update
+
+🤝 Contribution Guidelines
+
+We ❤️ contributions!
+
+Fork the repository.
+
+Create a feature branch (git checkout -b feature/my-feature).
+
+Commit changes (git commit -m "feat: add my feature").
+
+Push to the branch (git push origin feature/my-feature).
+
+Open a Pull Request.
+
+For major changes, please open an issue first to discuss.
+
+📄 License
+
+This project is licensed under the MIT License.
+See the LICENSE
+ file for more details.
+
+🎯 Khel-Connect turns raw practice into opportunity — let’s put every hidden player on the map.
+
