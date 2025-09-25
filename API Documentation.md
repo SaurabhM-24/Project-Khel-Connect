@@ -1,137 +1,117 @@
+# Khel-Connect: API Documentation (v1)
 
+## 1. Introduction
+This document provides a structured overview of the API and data model for the **Khel-Connect** platform. 
 
-# **1. Introduction**
+Khel-Connect follows a **serverless, Firebase-centric architecture**. The "API" is not a set of traditional REST endpoints but a series of **interactions with Firebase services** (Authentication, Firestore, and Storage) through their respective SDKs. 
 
-Khel-Connect is an AI-powered sports talent discovery platform --- a
-\'LinkedIn for Athletes.\' This document provides details of APIs and
-data flows for mobile clients, scouts' dashboard, and backend AI
-processing.\
-\
-The architecture is serverless and Firebase-centric. Instead of
-traditional HTTP APIs, most interactions occur via Firebase SDKs (Auth,
-Firestore, Storage). For clarity, we also provide equivalent REST-style
-examples.
+All communication is handled securely by Firebase's built-in SDKs and **Security Rules**, ensuring data integrity and user privacy.
 
-# **2. Authentication**
+---
 
-## **2.1 Athlete & Scout Authentication**
+## 2. Authentication
 
-Authentication is managed via Firebase Authentication.\
-Roles:\
-- Athletes → read/write their own data, upload videos.\
-- Scouts → read-only access to all athletes and video metadata.
+### 2.1 Athlete and Scout Authentication
+Authentication is managed by **Firebase Authentication**.
 
-  ---------------------------------------------------------------------------------------
-  SDK Call                                            Description
-  --------------------------------------------------- -----------------------------------
-  firebase.auth().signInWithEmailAndPassword(email,   Sign in user with email/password
-  password)                                           
+| SDK Call | Description |
+|----------|-------------|
+| `firebase.auth().signInWithEmailAndPassword(email, password)` | Authenticates a user with an email and password. |
+| `firebase.auth().signOut()` | Signs out the currently authenticated user. |
+| `firebase.auth().onAuthStateChanged(user)` | Listener that triggers whenever the user’s authentication state changes. |
 
-  firebase.auth().signOut()                           Sign out current user
+### 2.2 Data Security
+Access is controlled by **Firebase Security Rules**:
+- **Athletes**: Can only read and write to their own profile data and upload videos to their designated folder in Firebase Storage.  
+- **Scouts**: Have read-only access to all player profiles and video metadata.
 
-  firebase.auth().onAuthStateChanged(user)            Listen for authentication state
-                                                      changes
-  ---------------------------------------------------------------------------------------
+---
 
-REST Example (Login):
+## 3. Storage API (Video Upload)
+Video uploads are managed by **Firebase Storage**.
 
-POST
-https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=\<API_KEY\>\
-Content-Type: application/json\
-\
-{\
-\"email\": \"priya@example.com\",\
-\"password\": \"mypassword\",\
-\"returnSecureToken\": true\
-}
+| SDK Call | Description |
+|----------|-------------|
+| `firebase.storage().ref(path).put(file)` | Uploads a video file to a specified path in Firebase Storage (unique per user & video). |
+| `firebase.storage().ref(path).getDownloadURL()` | Retrieves a public URL for the uploaded video. This URL is then stored in Firestore. |
 
-## **2.2 Data Security**
+---
 
-\- Athletes: Can only access their own profile & videos.\
-- Scouts: Read-only access to profiles, scores, leaderboards.\
-- Enforced via Firebase Security Rules.
+## 4. Firestore Database API
+The **Firestore Database** is the central hub for application data. Data is accessed via the Firebase SDK. 
 
-# **3. Storage API (Video Upload)**
+### 4.1 Data Models
 
-Videos are stored in Firebase Storage.
+#### Users Collection
+- **Path**: `/users/{uid}`  
+- **Description**: Stores profile information for athletes and scouts.
 
-  -----------------------------------------------------------------------------------
-  SDK Call                                        Description
-  ----------------------------------------------- -----------------------------------
-  firebase.storage().ref(path).put(file)          Upload video to Firebase Storage
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | User’s full name. |
+| `email` | string | User’s email address. |
+| `location` | string | City/State location. |
+| `sport` | string | Athlete’s primary sport (e.g., "Cricket"). |
+| `role` | string | User role: `athlete` or `scout`. |
 
-  firebase.storage().ref(path).getDownloadURL()   Retrieve public download URL
-  -----------------------------------------------------------------------------------
+#### Videos Collection
+- **Path**: `/videos/{documentId}`  
+- **Description**: Stores metadata and AI analysis results for each uploaded video.
 
-Example Path Convention: /videos/{userId}/{timestamp}.mp4
+| Field | Type | Description |
+|-------|------|-------------|
+| `userId` | string | UID of the uploading user. |
+| `videoUrl` | string | Public download URL from Firebase Storage. |
+| `uploadTimestamp` | timestamp | Upload time. |
+| `status` | string | Processing status: `processing`, `complete`, or `failed`. |
+| `skillScore` | number | Numerical score (e.g., 88) generated by AI model. |
+| `analysisMetrics` | map | Detailed breakdown of AI analysis (e.g., `{ "armAngle": 90, "swingSpeed": 75 }`). |
 
-# **4. Firestore Database API**
+---
 
-## **4.1 Data Models**
+### 4.2 Core Data Operations
 
-Users Collection (/users/{uid})
+| SDK Call | Path | Description |
+|----------|------|-------------|
+| `firebase.firestore().collection('videos').add(data)` | `/videos` | Creates a new video document after a video is uploaded. |
+| `firebase.firestore().doc('videos/{docId}').update(data)` | `/videos/{docId}` | Updates status and AI analysis results of a video. |
+| `firebase.firestore().collection('videos').where('userId', '==', uid).get()` | `/videos` | Retrieves all videos for a specific user. |
+| `firebase.firestore().collection('videos').orderBy('skillScore', 'desc').get()` | `/videos` | Retrieves leaderboard of videos ordered by skill score (may require Firestore index). |
+| `firebase.firestore().doc('users/{uid}').get()` | `/users/{uid}` | Retrieves user profile. |
+| `firebase.firestore().collection('videos').onSnapshot(snapshot)` | `/videos` | Real-time listener for video processing updates and results. |
 
-  -----------------------------------------------------------------------
-  Field                   Type                    Description
-  ----------------------- ----------------------- -----------------------
-  name                    string                  Full name
+---
 
-  email                   string                  Email address
+## 5. Backend Triggers (Cloud Functions)
+The AI analysis pipeline is powered by **Firebase Cloud Functions**.
 
-  location                string                  City/State
+- **Trigger**: `onFinalize` event → Fires when a new video is uploaded to Firebase Storage.  
+- **Input**: Event object containing file metadata.  
+- **Process**: Cloud Function extracts frames, applies pose estimation, calculates metrics, and generates a skill score.  
+- **Output**: Writes analysis results into a corresponding Firestore document.  
 
-  sport                   string                  Primary sport (e.g.,
-                                                  Cricket)
+This approach ensures that all heavy computation is abstracted away from the frontend, keeping the application **lightweight, secure, and maintainable**.
 
-  role                    string                  athlete or scout
-  -----------------------------------------------------------------------
+---
 
-Videos Collection (/videos/{videoId})
+## 6. Error Handling (Recommended)
+- **Video Upload Failure** → Return status `failed` in Firestore with error details.  
+- **AI Processing Error** → Update video document with status `failed` and log issue for debugging.  
+- **Invalid User Access** → Blocked by Firebase Security Rules.  
 
-  -----------------------------------------------------------------------
-  Field                   Type                    Description
-  ----------------------- ----------------------- -----------------------
-  userId                  string                  Uploader's uid
+---
 
-  videoUrl                string                  Download URL
+## 7. Versioning & Maintenance
+- **API Version**: v1.0  
+- **Last Updated**: September 2025  
+- Future updates will introduce: 
+  - Support for multi-sport analysis.  
+  - Expanded scout dashboard queries.  
+  - Role-based advanced permissions.
 
-  uploadTimestamp         timestamp               Upload time
+---
 
-  status                  string                  processing / complete /
-                                                  failed
+## 8. Summary
+The **Khel-Connect API layer** leverages Firebase SDKs, Firestore, and Cloud Functions to create a seamless, secure, and scalable system for athlete video uploads, AI-driven skill evaluation, and scout access.  
 
-  skillScore              number                  AI score (0--100)
-
-  analysisMetrics         map                     Metrics e.g.,
-                                                  {armAngle: 145,
-                                                  swingSpeed: 23.5}
-  -----------------------------------------------------------------------
-
-## **4.2 Core Data Operations**
-
-  ------------------------------------------------------------------------------------------------------------------------------------
-  SDK Call                                                                             Path                    Description
-  ------------------------------------------------------------------------------------ ----------------------- -----------------------
-  firebase.firestore().collection(\'videos\').add(data)                                /videos                 Add video metadata
-                                                                                                               after upload
-
-  firebase.firestore().doc(\'videos/{docId}\').update(data)                            /videos/{id}            Update processing
-                                                                                                               results
-
-  firebase.firestore().collection(\'videos\').where(\'userId\',\'==\',uid).get()       /videos                 Get all videos for user
-
-  firebase.firestore().collection(\'videos\').orderBy(\'skillScore\',\'desc\').get()   /videos                 Get leaderboard
-                                                                                                               (requires index)
-
- firebase.firestore().doc(\'users/{uid}\').get()                                      /users/{uid}            Get user profile
-  ------------------------------------------------------------------------------------------------------------------------------------
-
-# **5. Backend Triggers (Cloud Functions)**
-
-\- Trigger: onFinalize event (when a new video is uploaded).\
-- Steps:\
-1. Extract frames (OpenCV)\
-2. Pose estimation (MediaPipe)\
-3. Apply custom metrics logic\
-4. Compute skillScore & analysisMetrics\
-5. Update Firestore document
+This architecture ensures minimal backend complexity while enabling powerful, real-time sports talent discovery.
