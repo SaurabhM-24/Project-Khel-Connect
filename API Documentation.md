@@ -1,6 +1,4 @@
 
-title: "Khel-Connect: API Documentation"
-
 
 # **1. Introduction**
 
